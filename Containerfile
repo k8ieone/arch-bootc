@@ -19,6 +19,7 @@ RUN pacman -Sy --noconfirm \
       glib2 \
       ostree \
       shadow \
+      whois \
       ${DEV_DEPS} && \
   pacman -S --clean --noconfirm && \
   rm -rf /var/cache/pacman/pkg/*
@@ -38,7 +39,7 @@ RUN --mount=type=tmpfs,dst=/tmp --mount=type=tmpfs,dst=/root \
 
 # Setup a temporary root passwd (changeme) for dev purposes
 # RUN pacman -S 
-# RUN usermod -p "$(echo "changeme" | mkpasswd -s)" root
+RUN usermod -p "$(echo "changeme" | mkpasswd -s)" root
 RUN rm -rf /boot /home /root /usr/local /srv && \
     mkdir -p /var/{home,roothome,srv} /sysroot /boot && \
     ln -s sysroot/ostree /ostree
@@ -50,5 +51,9 @@ RUN sed -i 's|^HOME=.*|HOME=/var/home|' "/etc/default/useradd"
 RUN mkdir -p /usr/lib/ostree && \
     printf  "[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n" | \
     tee "/usr/lib/ostree/prepare-root.conf"
+
+RUN pacman -S --noconfirm just networkmanager git nano zsh fastfetch
+
+RUN systemctl enable NetworkManager
 
 RUN bootc container lint
